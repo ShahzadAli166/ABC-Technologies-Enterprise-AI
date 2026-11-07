@@ -1,56 +1,106 @@
+
+# ABC Technologies — Live Enterprise AI Dashboard
+# Streamlit + Cloudflare Workers AI + D1
+
 import streamlit as st
 import requests
-import os
 
 st.set_page_config(
-    page_title="ABC Technologies AI",
+    page_title="ABC Technologies Enterprise AI",
     page_icon="🤖",
     layout="wide"
 )
 
-st.title("🤖 ABC Technologies")
-st.caption("Enterprise AI Assistant | Intelligent Business Operations")
-
-# Configuration
+# 1. Load secure application secrets
 try:
     API_URL = st.secrets["API_URL"].rstrip("/")
     API_KEY = st.secrets["API_KEY"]
 except Exception:
-    API_URL = os.getenv("API_URL", "").rstrip("/")
-    API_KEY = os.getenv("API_KEY", "")
+    API_URL = ""
+    API_KEY = ""
 
-# Sidebar
-st.sidebar.title("Navigation")
+WORKER_URL = API_URL + "/api/assistant" if API_URL else ""
+
+# 2. API communication
+def api_request(payload):
+
+    if not API_URL or not API_KEY:
+        raise ValueError("API_URL or API_KEY is not configured.")
+
+    response = requests.post(
+        WORKER_URL,
+        headers={"X-API-Key": API_KEY},
+        json=payload,
+        timeout=120
+    )
+
+    if not response.ok:
+        try:
+            detail = response.json().get("error", "Request failed")
+        except Exception:
+            detail = "Request failed"
+
+        raise RuntimeError(f"HTTP {response.status_code}: {detail}")
+
+    return response.json()
+
+
+# 3. Dashboard header
+st.title("🤖 ABC Technologies")
+st.caption("Enterprise AI Assistant | Intelligent Business Operations")
+
+# 4. Navigation
+st.sidebar.title("ABC Technologies")
 page = st.sidebar.radio(
-    "Select Module",
-    ["Dashboard", "Policy Assistant", "Order Calculator"]
+    "Choose Module",
+    ["Overview", "Policy Assistant", "Order Calculator"]
 )
 
 st.sidebar.divider()
-st.sidebar.caption("Powered by Qwen, LangGraph, RAG and MCP")
+st.sidebar.caption("Powered by Cloudflare Workers AI")
+st.sidebar.caption("Database: Cloudflare D1")
 
-if page == "Dashboard":
+# 5. Overview
+if page == "Overview":
 
     st.subheader("Enterprise Operations Dashboard")
 
-    c1, c2, c3 = st.columns(3)
+    col1, col2, col3 = st.columns(3)
 
-    c1.metric("AI Platform", "Active Prototype")
-    c2.metric("Knowledge Base", "FAISS + RAG")
-    c3.metric("Business Tools", "MCP")
+    col1.metric("AI Inference", "Workers AI")
+    col2.metric("Company Database", "D1")
+    col3.metric("API Gateway", "Cloudflare")
+
+    if st.button("Check Live System Status"):
+
+        try:
+            response = requests.get(
+                API_URL + "/health",
+                timeout=30
+            )
+
+            response.raise_for_status()
+            data = response.json()
+
+            st.success("Enterprise AI system is healthy!")
+            st.json(data)
+
+        except Exception as error:
+            st.error(f"Health check failed: {error}")
 
     st.info(
-        "Welcome to ABC Technologies Enterprise AI. "
-        "Use the navigation menu to access company policies "
-        "or calculate customer orders."
+        "Welcome to ABC Technologies. "
+        "Use the navigation menu to ask company policy "
+        "questions or calculate customer orders."
     )
 
+# 6. Policy Assistant
 elif page == "Policy Assistant":
 
-    st.subheader("Customer Policy Assistant")
+    st.subheader("📚 Customer Policy Assistant")
 
     customer_id = st.selectbox(
-        "Customer",
+        "Select Customer",
         ["customer_001", "customer_002"]
     )
 
@@ -61,42 +111,44 @@ elif page == "Policy Assistant":
 
     if st.button("Ask Enterprise AI", type="primary"):
 
-        if not API_URL or not API_KEY:
-            st.error("Configure API_URL and API_KEY in app secrets.")
-        elif not question.strip():
+        if not question.strip():
             st.warning("Please enter a question.")
+
         else:
             try:
-                with st.spinner("Enterprise AI is processing..."):
-                    response = requests.post(
-                        API_URL + "/api/assistant",
-                        headers={"X-API-Key": API_KEY},
-                        json={
-                            "customer_id": customer_id,
-                            "intent": "question",
-                            "question": question
-                        },
-                        timeout=180
-                    )
+                with st.spinner("Searching company knowledge and generating answer..."):
 
-                response.raise_for_status()
-                data = response.json()
+                    data = api_request({
+                        "customer_id": customer_id,
+                        "intent": "question",
+                        "question": question
+                    })
 
-                st.success("Answer generated successfully")
-                st.write(data.get("answer", "No answer returned"))
+                st.success("Answer generated successfully!")
 
-                with st.expander("Sources"):
+                st.markdown("### AI Response")
+                st.write(data["answer"])
+
+                st.markdown("### Customer")
+                st.write(data["customer"])
+
+                with st.expander("View document sources"):
                     st.write(data.get("sources", []))
 
-            except Exception as e:
-                st.error(f"Request failed: {e}")
+                st.caption(
+                    "Model: " + data.get("model", "Workers AI")
+                )
 
+            except Exception as error:
+                st.error(str(error))
+
+# 7. Order Calculator
 elif page == "Order Calculator":
 
-    st.subheader("Business Order Calculator")
+    st.subheader("🧮 Business Order Calculator")
 
     customer_id = st.selectbox(
-        "Customer",
+        "Select Customer",
         ["customer_001", "customer_002"],
         key="order_customer"
     )
@@ -104,48 +156,48 @@ elif page == "Order Calculator":
     quantity = st.number_input(
         "Quantity",
         min_value=1,
-        value=8
+        max_value=100000,
+        value=8,
+        step=1
     )
 
     unit_price = st.number_input(
-        "Unit price",
+        "Unit Price",
         min_value=0.0,
-        value=350.0
+        value=350.0,
+        step=50.0
     )
 
     if st.button("Calculate Order", type="primary"):
 
-        if not API_URL or not API_KEY:
-            st.error("Configure API_URL and API_KEY in app secrets.")
-        else:
-            try:
-                with st.spinner("Executing MCP business tool..."):
-                    response = requests.post(
-                        API_URL + "/api/assistant",
-                        headers={"X-API-Key": API_KEY},
-                        json={
-                            "customer_id": customer_id,
-                            "intent": "calculate",
-                            "quantity": quantity,
-                            "unit_price": unit_price
-                        },
-                        timeout=180
-                    )
+        try:
+            with st.spinner("Calculating order..."):
 
-                response.raise_for_status()
-                data = response.json()
+                data = api_request({
+                    "customer_id": customer_id,
+                    "intent": "calculate",
+                    "quantity": int(quantity),
+                    "unit_price": float(unit_price)
+                })
 
-                st.success("MCP calculation successful")
-                st.metric(
-                    "Verified Order Total",
-                    f'{data["currency"]} {data["total"]:,.2f}'
-                )
+            st.success("Order calculation successful!")
 
-                st.write("Customer:", data["customer"])
-                st.write("Tool:", data["tool"])
+            st.metric(
+                "Total Order Amount",
+                f'{data["currency"]} {data["total"]:,.2f}'
+            )
 
-            except Exception as e:
-                st.error(f"Request failed: {e}")
+            col1, col2 = st.columns(2)
 
+            col1.write("Customer: " + data["customer"])
+            col1.write("Quantity: " + str(data["quantity"]))
+
+            col2.write("Unit price: " + str(data["unit_price"]))
+            col2.write("Execution: " + data["execution"])
+
+        except Exception as error:
+            st.error(str(error))
+
+# 8. Footer
 st.divider()
-st.caption("ABC Technologies | Enterprise AI Capstone Project")
+st.caption("ABC Technologies | Enterprise AI Capstone")
