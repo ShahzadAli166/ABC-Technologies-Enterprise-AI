@@ -1,3 +1,10 @@
-name = "abc-technologies-ai"
+
+name = "abc-technologies-enterprise-aii"
 main = "src/index.js"
 compatibility_date = "2026-11-07"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "abc-technologies-db"
+database_id = "3640002d-9f99-4bdc-ac97-a01e3a93fb3e"
+
