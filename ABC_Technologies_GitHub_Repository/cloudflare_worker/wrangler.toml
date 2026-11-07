@@ -8,3 +8,5 @@ binding = "DB"
 database_name = "abc-technologies-db"
 database_id = "3640002d-9f99-4bdc-ac97-a01e3a93fb3e"
 
+[ai]
+binding = "AI"
