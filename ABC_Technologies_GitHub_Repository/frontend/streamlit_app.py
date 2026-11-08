@@ -2,8 +2,10 @@ import os
 import requests
 import streamlit as st
 
-# ABC Technologies — Enterprise AI Dashboard v2
-# Frontend: Streamlit | API: Cloudflare Workers | Data: D1 | Inference: Workers AI
+# =========================================================
+# ABC TECHNOLOGIES — ENTERPRISE AI DASHBOARD V2
+# Streamlit + Cloudflare Workers AI + Cloudflare D1
+# =========================================================
 
 st.set_page_config(
     page_title="ABC Technologies | Enterprise AI",
@@ -12,57 +14,105 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# -------------------------------------------------------------------
-# VISUAL DESIGN
-# -------------------------------------------------------------------
+# -------------------------
+# Visual identity and styling
+# -------------------------
 st.markdown(
     """
     <style>
     .stApp { background: #F3F6FA; }
-    .block-container { max-width: 1380px; padding-top: 1.8rem; padding-bottom: 3rem; }
-    [data-testid="stSidebar"] { background: #102A43; border-right: 1px solid #24445F; }
+    .block-container {
+        max-width: 1380px;
+        padding-top: 1.8rem;
+        padding-bottom: 3rem;
+    }
+    [data-testid="stSidebar"] {
+        background: #102A43;
+        border-right: 1px solid #24445F;
+    }
     [data-testid="stSidebar"] [data-testid="stMarkdownContainer"],
     [data-testid="stSidebar"] label,
     [data-testid="stSidebar"] p,
     [data-testid="stSidebar"] span { color: #EAF2F8; }
-    [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2,
+    [data-testid="stSidebar"] h1,
+    [data-testid="stSidebar"] h2,
     [data-testid="stSidebar"] h3 { color: #FFFFFF; }
     [data-testid="stMetric"] {
-        background: #FFFFFF; border: 1px solid #DFE7F0;
-        border-radius: 14px; padding: 16px 18px;
-        box-shadow: 0 3px 12px rgba(16,42,67,.045);
+        background: #FFFFFF;
+        border: 1px solid #DFE7F0;
+        border-radius: 14px;
+        padding: 17px 18px;
+        box-shadow: 0 3px 12px rgba(16,42,67,0.045);
     }
     [data-testid="stMetricLabel"] { color: #52677D; font-weight: 600; }
     [data-testid="stMetricValue"] { color: #102A43; }
     [data-testid="stVerticalBlockBorderWrapper"] {
-        border-radius: 14px; border-color: #DFE7F0; background: #FFFFFF;
+        border-radius: 14px;
+        border-color: #DFE7F0;
+        background: #FFFFFF;
     }
     [data-testid="stChatMessage"] {
-        background: #FFFFFF; border: 1px solid #DFE7F0;
-        border-radius: 14px; padding: 12px 16px; margin-bottom: 10px;
+        background: #FFFFFF;
+        border: 1px solid #DFE7F0;
+        border-radius: 14px;
+        padding: 12px 16px;
+        margin-bottom: 10px;
     }
     .hero {
         background: linear-gradient(115deg, #102A43 0%, #174B68 62%, #0F766E 100%);
-        padding: 27px 31px; border-radius: 19px; color: #FFFFFF;
-        margin-bottom: 22px; box-shadow: 0 8px 24px rgba(16,42,67,.13);
+        padding: 28px 32px;
+        border-radius: 20px;
+        color: #FFFFFF;
+        margin-bottom: 22px;
+        box-shadow: 0 8px 24px rgba(16,42,67,0.13);
     }
-    .hero-kicker { color: #99F6E4; font-size: .74rem; font-weight: 800;
-        letter-spacing: .13em; text-transform: uppercase; margin-bottom: 9px; }
-    .hero h1 { color: #FFFFFF !important; font-size: 2.05rem;
-        margin: 0 0 8px 0; line-height: 1.2; }
+    .hero-kicker {
+        color: #99F6E4;
+        font-size: 0.76rem;
+        font-weight: 700;
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
+        margin-bottom: 9px;
+    }
+    .hero h1 {
+        color: #FFFFFF !important;
+        font-size: 2.1rem;
+        margin: 0 0 8px 0;
+        line-height: 1.2;
+    }
     .hero p { color: #E0EDF5; font-size: 1rem; margin: 0; }
-    .section-kicker { color: #0F766E; text-transform: uppercase;
-        letter-spacing: .1em; font-size: .72rem; font-weight: 800; margin-bottom: 4px; }
-    .soft-note { background: #E5F3F2; border-left: 4px solid #0F766E;
-        padding: 13px 16px; border-radius: 8px; color: #164E52; margin: 10px 0 18px 0; }
+    .section-kicker {
+        color: #0F766E;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-size: 0.72rem;
+        font-weight: 800;
+        margin-bottom: 4px;
+    }
+    .soft-note {
+        background: #E5F3F2;
+        border-left: 4px solid #0F766E;
+        padding: 13px 16px;
+        border-radius: 8px;
+        color: #164E52;
+        margin: 10px 0 18px 0;
+    }
     div.stButton > button[kind="primary"],
     div.stFormSubmitButton > button[kind="primary"] {
-        background: #0F766E; border: 1px solid #0F766E; color: #FFFFFF;
-        border-radius: 9px; font-weight: 650;
+        background: #0F766E;
+        border: 1px solid #0F766E;
+        color: white;
+        border-radius: 9px;
+        font-weight: 650;
     }
     div.stButton > button[kind="primary"]:hover,
     div.stFormSubmitButton > button[kind="primary"]:hover {
-        background: #115E59; border-color: #115E59; color: #FFFFFF;
+        background: #115E59;
+        border-color: #115E59;
+        color: white;
+    }
+    div.stButton > button {
+        border-radius: 9px;
     }
     footer { visibility: hidden; }
     </style>
@@ -70,9 +120,9 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# -------------------------------------------------------------------
-# CONFIGURATION AND API CLIENT
-# -------------------------------------------------------------------
+# -------------------------
+# Secure API configuration
+# -------------------------
 try:
     API_URL = st.secrets["API_URL"].rstrip("/")
     API_KEY = st.secrets["API_KEY"]
@@ -83,14 +133,19 @@ except Exception:
 WORKER_URL = f"{API_URL}/api/assistant" if API_URL else ""
 
 
-def call_assistant(payload):
+def call_assistant(payload: dict) -> dict:
     """Call the existing authenticated Cloudflare Worker API."""
     if not API_URL or not API_KEY:
-        raise RuntimeError("API_URL or API_KEY is missing. Configure both in Streamlit Secrets.")
+        raise RuntimeError(
+            "API_URL or API_KEY is missing. Configure both in Streamlit Secrets."
+        )
 
     response = requests.post(
         WORKER_URL,
-        headers={"X-API-Key": API_KEY, "Content-Type": "application/json"},
+        headers={
+            "X-API-Key": API_KEY,
+            "Content-Type": "application/json",
+        },
         json=payload,
         timeout=120,
     )
@@ -102,12 +157,13 @@ def call_assistant(payload):
 
     if not response.ok:
         raise RuntimeError(
-            f"API request failed ({response.status_code}): {data.get('error', 'Unknown error')}"
+            f"API request failed ({response.status_code}): "
+            f"{data.get('error', 'Unknown error')}"
         )
     return data
 
 
-def get_health():
+def get_health() -> dict:
     if not API_URL:
         raise RuntimeError("API_URL is missing from Streamlit Secrets.")
     response = requests.get(f"{API_URL}/health", timeout=30)
@@ -115,27 +171,92 @@ def get_health():
     return response.json()
 
 
-def show_hero(kicker, title, subtitle):
+def show_hero(kicker: str, title: str, subtitle: str) -> None:
     st.markdown(
-        f'<div class="hero"><div class="hero-kicker">{kicker}</div>'
-        f'<h1>{title}</h1><p>{subtitle}</p></div>',
+        f"""
+        <div class="hero">
+            <div class="hero-kicker">{kicker}</div>
+            <h1>{title}</h1>
+            <p>{subtitle}</p>
+        </div>
+        """,
         unsafe_allow_html=True,
     )
 
 
-# -------------------------------------------------------------------
-# SIDEBAR
-# -------------------------------------------------------------------
+def customer_label(customer_id: str) -> str:
+    return "Ahmed · PKR" if customer_id == "customer_001" else "Sara · USD"
+
+
+def render_chat_history(history: list) -> None:
+    for item in history:
+        avatar = "👤" if item.get("role") == "user" else "🤖"
+        with st.chat_message(item.get("role", "assistant"), avatar=avatar):
+            st.markdown(item.get("content", ""))
+            if item.get("sources"):
+                with st.expander("View source documents"):
+                    for source in item["sources"]:
+                        st.caption(f"📄 {source}")
+            if item.get("model"):
+                st.caption(f"Generated by {item['model']}")
+
+
+def answer_policy_question(customer_id: str, prompt: str, history_key: str) -> None:
+    """Submit a question, display the answer and retain session chat history."""
+    st.session_state[history_key].append({"role": "user", "content": prompt})
+
+    with st.chat_message("user", avatar="👤"):
+        st.markdown(prompt)
+
+    with st.chat_message("assistant", avatar="🤖"):
+        try:
+            with st.spinner("ABC AI is checking company records..."):
+                result = call_assistant({
+                    "customer_id": customer_id,
+                    "intent": "question",
+                    "question": prompt,
+                })
+
+            answer = result.get("answer", "No answer was returned.")
+            sources = result.get("sources", [])
+            model_name = result.get("model", "Cloudflare Workers AI")
+
+            st.markdown(answer)
+            if sources:
+                with st.expander("View source documents"):
+                    for source in sources:
+                        st.caption(f"📄 {source}")
+            st.caption(f"Generated by {model_name}")
+
+            st.session_state[history_key].append({
+                "role": "assistant",
+                "content": answer,
+                "sources": sources,
+                "model": model_name,
+            })
+        except Exception as exc:
+            error_text = f"I couldn't complete that request: {exc}"
+            st.error(error_text)
+            st.session_state[history_key].append({
+                "role": "assistant",
+                "content": error_text,
+            })
+
+
+# -------------------------
+# Sidebar navigation
+# -------------------------
 with st.sidebar:
     st.markdown("# 🤖 ABC")
     st.markdown("### Technologies")
     st.caption("ENTERPRISE INTELLIGENCE")
     st.divider()
+
     page = st.radio(
         "WORKSPACE",
         ["Overview", "Policy Assistant", "Order Calculator"],
-        label_visibility="visible",
     )
+
     st.divider()
     st.markdown("**PLATFORM**")
     st.caption("✦ Cloudflare Workers AI")
@@ -146,9 +267,9 @@ with st.sidebar:
     st.caption("Enterprise AI Demonstration")
 
 
-# ===================================================================
-# 1. OVERVIEW — METRICS, PLATFORM STATUS, WORKFLOW CARDS
-# ===================================================================
+# =========================================================
+# PAGE 1 — OVERVIEW + HOMEPAGE AI CONCIERGE
+# =========================================================
 if page == "Overview":
     show_hero(
         "ENTERPRISE INTELLIGENCE PLATFORM",
@@ -159,39 +280,42 @@ if page == "Overview":
     st.markdown('<div class="section-kicker">SYSTEM OVERVIEW</div>', unsafe_allow_html=True)
     st.subheader("Your AI operations at a glance")
 
-    c1, c2, c3 = st.columns(3, gap="medium")
-    c1.metric("AI inference", "Workers AI", "GLM-4.7-Flash")
-    c2.metric("Knowledge store", "Cloudflare D1", "3 policy records")
-    c3.metric("API gateway", "Cloudflare", "Authenticated")
+    metric1, metric2, metric3 = st.columns(3, gap="medium")
+    with metric1:
+        st.metric("AI inference", "Workers AI", "GLM-4.7-Flash")
+    with metric2:
+        st.metric("Knowledge store", "Cloudflare D1", "3 policy records")
+    with metric3:
+        st.metric("API gateway", "Cloudflare", "Authenticated")
 
     st.write("")
-    left, right = st.columns([1.35, 1], gap="large")
+    left, right = st.columns([1.3, 1], gap="large")
 
     with left:
         with st.container(border=True):
             st.markdown("### 👋 Welcome to ABC Technologies")
             st.write(
-                "Use the workspace to retrieve information from company policies "
-                "or calculate customer orders through the connected business API."
+                "Explore company policies, get customer-aware answers, "
+                "and calculate sample business orders through one workspace."
             )
             st.markdown(
                 '<div class="soft-note"><b>Available workflows</b><br>'
-                'Policy questions grounded in company records · Customer-aware responses · '
-                'Validated order calculations</div>',
+                '📚 Company policy questions · 👤 Customer-aware responses · '
+                '🧮 Validated order calculations</div>',
                 unsafe_allow_html=True,
             )
-            a, b = st.columns(2)
-            with a:
+            info1, info2 = st.columns(2)
+            with info1:
                 st.write("**📚 Policy Assistant**")
                 st.caption("Ask about refunds, processing and support.")
-            with b:
+            with info2:
                 st.write("**🧮 Order Calculator**")
                 st.caption("Calculate customer order totals.")
 
     with right:
         with st.container(border=True):
             st.markdown("### ☁️ Live service status")
-            st.write("Check the deployed gateway and its database connection.")
+            st.write("Check the deployed gateway and database connection.")
             if st.button("Check live system", type="primary", use_container_width=True):
                 try:
                     with st.spinner("Checking Cloudflare services..."):
@@ -204,31 +328,108 @@ if page == "Overview":
                 except Exception as exc:
                     st.error(str(exc))
 
-    st.caption("Deployment: Streamlit Community Cloud · Cloudflare Workers · Workers AI · D1")
+    # Homepage chatbot — visitors can interact without navigating away.
+    st.write("")
+    show_hero(
+        "LIVE AI DEMONSTRATION",
+        "Meet ABC AI Concierge.",
+        "Ask a company-policy question and see the deployed AI assistant in action.",
+    )
+
+    with st.container(border=True):
+        concierge_col, profile_col = st.columns([2, 1], gap="large")
+
+        with profile_col:
+            st.markdown("### 👤 Demo customer")
+            home_customer = st.selectbox(
+                "Choose a customer profile",
+                ["customer_001", "customer_002"],
+                format_func=customer_label,
+                key="home_customer",
+            )
+            if home_customer == "customer_001":
+                st.caption("Ahmed · Preferred currency: PKR · Contact: Email")
+            else:
+                st.caption("Sara · Preferred currency: USD · Contact: Email")
+
+            st.markdown("**Try asking about:**")
+            st.caption("• Refund deadlines")
+            st.caption("• Order processing")
+            st.caption("• Customer support hours")
+
+            if st.button("Clear homepage conversation", key="clear_home_chat"):
+                st.session_state[f"home_chat_{home_customer}"] = []
+                st.rerun()
+
+        with concierge_col:
+            st.markdown("### 💬 Ask ABC AI")
+            st.caption("Responses are generated using the deployed company knowledge base.")
+
+            home_history_key = f"home_chat_{home_customer}"
+            if home_history_key not in st.session_state:
+                st.session_state[home_history_key] = []
+
+            render_chat_history(st.session_state[home_history_key])
+
+            # Clickable suggested prompts
+            suggestion_columns = st.columns(3)
+            suggested_questions = [
+                "What is the refund deadline?",
+                "How long does order processing take?",
+                "When is customer support available?",
+            ]
+            selected_suggestion = None
+            for index, suggestion in enumerate(suggested_questions):
+                with suggestion_columns[index]:
+                    if st.button(
+                        ["↩ Refunds", "📦 Orders", "🎧 Support"][index],
+                        key=f"home_suggestion_{index}",
+                        use_container_width=True,
+                    ):
+                        selected_suggestion = suggestion
+
+            home_prompt = st.chat_input(
+                "Ask ABC AI about company policies...",
+                key=f"home_chat_input_{home_customer}",
+            )
+
+            prompt_to_send = home_prompt or selected_suggestion
+            if prompt_to_send:
+                answer_policy_question(
+                    home_customer,
+                    prompt_to_send,
+                    home_history_key,
+                )
+
+    st.caption(
+        "Deployment: Streamlit Community Cloud · Cloudflare Workers · "
+        "Workers AI · D1"
+    )
 
 
-# ===================================================================
-# 2. POLICY ASSISTANT — CHAT UI, CUSTOMER PROFILE, SOURCES
-# ===================================================================
+# =========================================================
+# PAGE 2 — POLICY ASSISTANT
+# =========================================================
 elif page == "Policy Assistant":
     show_hero(
         "CUSTOMER KNOWLEDGE",
         "Policy Assistant",
-        "Ask a question about company policies and receive an AI-generated response grounded in company records.",
+        "Ask questions about company policies and receive AI-generated responses grounded in company records.",
     )
 
-    col_main, col_profile = st.columns([2.1, 1], gap="large")
+    profile_col, chat_col = st.columns([1, 2.1], gap="large")
 
-    with col_profile:
+    with profile_col:
         with st.container(border=True):
             st.markdown("### 👤 Customer profile")
-            customer_id = st.selectbox(
+            policy_customer = st.selectbox(
                 "Choose demo customer",
                 ["customer_001", "customer_002"],
-                format_func=lambda x: "Ahmed · PKR" if x == "customer_001" else "Sara · USD",
+                format_func=customer_label,
                 key="policy_customer",
             )
-            if customer_id == "customer_001":
+
+            if policy_customer == "customer_001":
                 st.markdown("**Ahmed**")
                 st.caption("Preferred currency: PKR")
                 st.caption("Preferred contact: Email")
@@ -239,83 +440,41 @@ elif page == "Policy Assistant":
 
             st.divider()
             st.markdown("**Knowledge topics**")
-            st.caption("• Refund policy")
-            st.caption("• Order processing")
-            st.caption("• Customer support")
+            st.caption("📄 Customer Refund Policy")
+            st.caption("📄 Order Processing Policy")
+            st.caption("📄 Customer Support Guidelines")
 
-            if st.button("Clear this chat", use_container_width=True):
-                st.session_state[f"policy_history_{customer_id}"] = []
+            policy_history_key = f"policy_chat_{policy_customer}"
+            if st.button("Clear this conversation", use_container_width=True):
+                st.session_state[policy_history_key] = []
                 st.rerun()
 
-    with col_main:
+    with chat_col:
         with st.container(border=True):
-            st.markdown("### 💬 Ask your company-policy question")
-            st.caption("Answers are generated using the company's stored policy records.")
+            st.markdown("### 💬 Company knowledge assistant")
+            st.caption("Ask a question below. Your conversation is retained for this active session.")
 
-            history_key = f"policy_history_{customer_id}"
-            if history_key not in st.session_state:
-                st.session_state[history_key] = []
+            if policy_history_key not in st.session_state:
+                st.session_state[policy_history_key] = []
 
-            for item in st.session_state[history_key]:
-                with st.chat_message(
-                    item["role"],
-                    avatar="👤" if item["role"] == "user" else "🤖",
-                ):
-                    st.markdown(item["content"])
-                    if item.get("sources"):
-                        with st.expander("View source documents"):
-                            for source in item["sources"]:
-                                st.caption(f"📄 {source}")
-                    if item.get("model"):
-                        st.caption(f"Model: {item['model']}")
+            render_chat_history(st.session_state[policy_history_key])
 
-            prompt = st.chat_input(
+            policy_prompt = st.chat_input(
                 "Ask about refunds, order processing or support...",
-                key=f"policy_chat_input_{customer_id}",
+                key=f"policy_input_{policy_customer}",
             )
 
-            if prompt:
-                st.session_state[history_key].append({"role": "user", "content": prompt})
-                with st.chat_message("user", avatar="👤"):
-                    st.markdown(prompt)
-
-                with st.chat_message("assistant", avatar="🤖"):
-                    try:
-                        with st.spinner("Searching company records and generating an answer..."):
-                            result = call_assistant({
-                                "customer_id": customer_id,
-                                "intent": "question",
-                                "question": prompt,
-                            })
-
-                        answer = result.get("answer", "No answer was returned.")
-                        st.markdown(answer)
-                        sources = result.get("sources", [])
-
-                        if sources:
-                            with st.expander("View source documents"):
-                                for source in sources:
-                                    st.caption(f"📄 {source}")
-
-                        model_name = result.get("model", "Cloudflare Workers AI")
-                        st.caption(f"Generated by {model_name}")
-                        st.session_state[history_key].append({
-                            "role": "assistant",
-                            "content": answer,
-                            "sources": sources,
-                            "model": model_name,
-                        })
-                    except Exception as exc:
-                        st.error(str(exc))
-                        st.session_state[history_key].append({
-                            "role": "assistant",
-                            "content": f"Request failed: {exc}",
-                        })
+            if policy_prompt:
+                answer_policy_question(
+                    policy_customer,
+                    policy_prompt,
+                    policy_history_key,
+                )
 
 
-# ===================================================================
-# 3. ORDER CALCULATOR — CUSTOMER FORM, RESULT CARD, BREAKDOWN
-# ===================================================================
+# =========================================================
+# PAGE 3 — ORDER CALCULATOR
+# =========================================================
 elif page == "Order Calculator":
     show_hero(
         "BUSINESS OPERATIONS",
@@ -323,7 +482,7 @@ elif page == "Order Calculator":
         "Prepare an order, validate the inputs and calculate the total through the live Cloudflare business API.",
     )
 
-    input_col, result_col = st.columns([1.2, 1], gap="large")
+    input_col, result_col = st.columns([1.15, 1], gap="large")
 
     with input_col:
         with st.container(border=True):
@@ -331,21 +490,32 @@ elif page == "Order Calculator":
             st.caption("Enter the customer and order information.")
 
             with st.form("order_calculator_form", border=False):
-                customer_id = st.selectbox(
+                order_customer = st.selectbox(
                     "Customer",
                     ["customer_001", "customer_002"],
-                    format_func=lambda x: "Ahmed · PKR" if x == "customer_001" else "Sara · USD",
+                    format_func=customer_label,
                 )
-                default_price = 350.0 if customer_id == "customer_001" else 50.0
+
+                default_price = 350.0 if order_customer == "customer_001" else 50.0
                 quantity = st.number_input(
-                    "Quantity", min_value=1, max_value=100000, value=8, step=1
+                    "Quantity",
+                    min_value=1,
+                    max_value=100000,
+                    value=8,
+                    step=1,
                 )
                 unit_price = st.number_input(
-                    "Unit price", min_value=0.0, max_value=1000000000.0,
-                    value=default_price, step=50.0 if customer_id == "customer_001" else 5.0,
+                    "Unit price",
+                    min_value=0.0,
+                    max_value=1000000000.0,
+                    value=default_price,
+                    step=50.0 if order_customer == "customer_001" else 5.0,
                 )
+
                 submitted = st.form_submit_button(
-                    "Calculate order total", type="primary", use_container_width=True
+                    "Calculate order total",
+                    type="primary",
+                    use_container_width=True,
                 )
 
     with result_col:
@@ -357,7 +527,7 @@ elif page == "Order Calculator":
                 try:
                     with st.spinner("Calculating order through Cloudflare..."):
                         result = call_assistant({
-                            "customer_id": customer_id,
+                            "customer_id": order_customer,
                             "intent": "calculate",
                             "quantity": int(quantity),
                             "unit_price": float(unit_price),
@@ -365,6 +535,7 @@ elif page == "Order Calculator":
 
                     currency = result["currency"]
                     total = result["total"]
+
                     st.success("Order calculation completed")
                     st.metric("Total order amount", f"{currency} {total:,.2f}")
                     st.divider()
@@ -385,8 +556,11 @@ elif page == "Order Calculator":
                 st.latex(r"\text{Order Total} = \text{Quantity} \times \text{Unit Price}")
 
 
-# -------------------------------------------------------------------
-# FOOTER
-# -------------------------------------------------------------------
+# -------------------------
+# Footer
+# -------------------------
 st.divider()
-st.caption("ABC Technologies · Enterprise AI Demonstration · Streamlit + Cloudflare Workers AI + D1")
+st.caption(
+    "ABC Technologies · Enterprise AI Demonstration · "
+    "Streamlit + Cloudflare Workers AI + D1"
+)
